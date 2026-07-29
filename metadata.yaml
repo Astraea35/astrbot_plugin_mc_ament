@@ -1,9 +1,13 @@
 name: astrbot_plugin_mc_ament
-desc: 在聊天中生成高度还原的 Minecraft 风格成就/进阶图片，支持智能提取头像、自定义引用图片、及输出格式调优。
-help: 使用 /mc成就 [标题] [描述] 生成图片。支持 @用户 或引用图片来更换图标。
-version: 2.1.0
-author: AstrBot插件开发
-display_name: MC成就生成器
-short_desc: 生成原汁原味的 Minecraft 像素风成就图片。
-support_platforms: ["aiocqhttp", "qq_official", "satori", "kook"]
+desc: "在聊天中生成高度还原的 Minecraft 风格成就/进阶图片，支持智能提取头像、自定义引用图片、及输出格式调优。"
+help: "使用 /mc成就 [标题] [描述] 生成图片。支持 @用户 或引用图片来更换图标。"
+version: "2.1.0"
+author: "Astraea35"
+repo: https://github.com/Astraea35/astrbot_plugin_mc_ament
+display_name: "MC成就生成器"
 astrbot_version: ">=4.23.0"
+support_platforms:
+  - aiocqhttp
+  - qq_official
+  - satori
+  - kook
