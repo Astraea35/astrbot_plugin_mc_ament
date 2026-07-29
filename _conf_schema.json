@@ -1,0 +1,22 @@
+{
+    "default_type": {
+        "type": "string",
+        "title": "默认成就类型",
+        "description": "默认生成普通黄字(task)还是紫色挑战(challenge)",
+        "options": ["task", "challenge"],
+        "default": "task"
+    },
+    "output_format": {
+        "type": "string",
+        "title": "输出图片格式",
+        "description": "生成图片的格式 (JPEG 无透明层体积小，PNG/WEBP 保留透明度)",
+        "options": ["PNG", "JPEG", "WEBP"],
+        "default": "PNG"
+    },
+    "output_quality": {
+        "type": "int",
+        "title": "输出图片质量",
+        "description": "图片压缩质量 (1-100)，数字越小体积越小。仅对 JPEG 和 WEBP 生效。",
+        "default": 90
+    }
+}
