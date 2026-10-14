@@ -1,5 +1,8 @@
 # MC 成就生成器 (MC Advancement Generator)
 
+Telegram 支持回复图片或直接附图作为图标，读取本地附件；成就创作结果仍发送图片。
+Telegram 的用户 ID 不会用于 QQ 头像查询。输出格式和质量读取本插件配置。
+
 将 Minecraft 的进阶（Advancement）提示框带入聊天框！这是一款为 AstrBot 打造的图片生成插件，支持自动排版、智能图片提取及画质控制。
 
 ## ✨ 核心特性

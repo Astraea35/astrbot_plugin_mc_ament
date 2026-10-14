@@ -1,5 +1,6 @@
 import os, io, aiohttp, re, logging
 from PIL import Image as PILImage, ImageDraw, ImageFont
+from astrbot.api import AstrBotConfig
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Star, Context
 # 完美同步表情转存插件的组件：引入 Reply, Image, At, Plain
@@ -8,9 +9,9 @@ from astrbot.api.message_components import Image, At, Plain, Reply
 logger = logging.getLogger("astrbot")
 
 class MCAdvancementPlugin(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
-        self.config = self.context.get_config()
+        self.config = config
         self.plugin_dir = os.path.dirname(__file__)
         self.assets_dir = os.path.join(self.plugin_dir, "assets")
         self.bg_path = os.path.join(self.assets_dir, "AdvancementMade_BG.png")
@@ -60,21 +61,21 @@ class MCAdvancementPlugin(Star):
                 f_title = f_desc = ImageFont.load_default()
 
             # --- 4. 原生且最稳健的图标提取逻辑 (向表情转存插件看齐) ---
-            icon_url = None
+            icon_url = await self._find_icon(event)
             
-            for comp in event.message_obj.message:
+            for comp in event.message_obj.message if not icon_url else []:
                 # 情况A: 直接抓取当前消息链里的图片 (兼容直发图和适配器自带解析的图)
                 if isinstance(comp, Image):
-                    icon_url = getattr(comp, "url", getattr(comp, "file", None))
+                    icon_url = comp.url or comp.file
                     if icon_url: break
                 
                 # 情况B: 抓取当前消息里的 @某人
-                elif isinstance(comp, At):
+                elif isinstance(comp, At) and event.get_platform_name() != "telegram":
                     icon_url = f"https://q.qlogo.cn/g?b=qq&nk={comp.qq}&s=640"
                     break
                     
                 # 情况C: 抓取底层的引用回复 Reply 组件
-                elif isinstance(comp, Reply):
+                elif isinstance(comp, Reply) and event.get_platform_name() != "telegram":
                     # 有些平台在遇到 Reply 时，会把原图的链接包裹在 Reply 的底层字符串中
                     # 我们用强正则兜底，只要看到像图片链接的，直接抽出来
                     urls = re.findall(r'(https?://[^\s\'"<>\[\]]+)', str(comp))
@@ -148,9 +149,23 @@ class MCAdvancementPlugin(Star):
             logger.error(f"[MC成就] 渲染异常: {e}", exc_info=True)
             return event.plain_result(f"生成失败: {str(e)}")
 
+    async def _find_icon(self, event):
+        for component in event.message_obj.message:
+            chain = component.chain if isinstance(component, Reply) else [component]
+            for image in chain or []:
+                if isinstance(image, Image):
+                    try:
+                        return await image.convert_to_file_path()
+                    except Exception:
+                        logger.warning("[MC成就] 无法读取消息中的图片")
+        return None
+
     async def _load_icon(self, url):
         if url:
             try:
+                local_path = str(url).removeprefix("file:///")
+                if os.path.isfile(local_path):
+                    return PILImage.open(local_path).convert("RGBA")
                 headers = {'User-Agent': 'Mozilla/5.0'}
                 async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as s:
                     async with s.get(url, headers=headers) as r:
